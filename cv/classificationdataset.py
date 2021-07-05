@@ -76,15 +76,4 @@ class ClassificationDataset(Dataset):
         return image, imagelabel, imagepath
     
     def __len__(self):
-        return self.len
-            
-        
-            
-        
-            
-            
-        
-    
-
-        
-        
+        return self.len        
