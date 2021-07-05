@@ -1,3 +1,6 @@
+# cv/classificationdataset.py
+# Creates dataset for classification tasks
+
 import torch
 import torchvision as tv
 from torch.utils.data import Dataset

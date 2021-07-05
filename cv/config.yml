@@ -1,7 +1,7 @@
 task: 'classification'
 datadir: '/media/ranjan/dl/smartzoo/data'
 numepochs: 100
-finetuneepochs: 0
+finetuneepochs: 1
 logdir: 'logs'
 optimizer: 
     name: 'rmsprop'
@@ -10,9 +10,9 @@ optimizer:
     momentum: 0.9
     weightdecay: 1e-5
 lossfn: 'crossentropyloss'
-pretrained: 'eff'
-pretrainedpath: 'logs/ckpt/ckpt_0.pt'
-batchsize: 4
+pretrained: 'imagenet'
+pretrainedpath: ''
+batchsize: 1
 imagesize: 300
 tasks:
     classification:

@@ -19,19 +19,13 @@ class Classification(nn.Module):
         if 'inception' in extractor:
             numftrs = self.encoder.AuxLogits.fc.in_features
             self.encoder.AuxLogits.fc = nn.Linear(numftrs, numclasses)
+            
+        if 'efficientnet' in extractor:
+            self.encoder._fc = nn.Linear(self.encoder._fc.in_features, numclasses, bias=True)
+        else:
+            self.encoder.fc = nn.Linear(self.encoder.fc.in_features, numclasses, bias=True)
+            
         
-        self.encoder.fc = self.encoder._fc if 'efficientnet' in extractor else self.encoder.fc 
-        self.encoder.fc = nn.Sequential(
-            nn.Linear(self.encoder.fc.in_features, 256, bias=True),
-            nn.ReLU(inplace=True),
-            nn.Linear(256, 128, bias=True),
-            nn.ReLU(inplace=True),
-            nn.Linear(128, 64, bias=True),
-            nn.ReLU(inplace=True),
-            nn.Linear(64, 32, bias=True),
-            nn.ReLU(inplace=True),
-            nn.Linear(32, numclasses, bias=True)
-        )
 
     def forward(self, images):
         return self.encoder(images)
