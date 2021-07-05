@@ -1,5 +1,0 @@
-[core]
-    remote = storage
-    hardlink_lock = true
-['remote "storage"']
-    url = ../stores/blob
