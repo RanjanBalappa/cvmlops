@@ -1,5 +1,5 @@
 task: 'classification'
-datadir: '/media/ranjan/dl/smartzoo/data'
+datadir: 'stores/blob'
 numepochs: 100
 finetuneepochs: 1
 logdir: 'logs'
