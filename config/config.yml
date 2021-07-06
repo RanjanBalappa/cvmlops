@@ -1,6 +1,7 @@
 task: 'classification'
 datadir: 'stores/blob'
 numepochs: 100
+earlystopping: 10
 finetuneepochs: 1
 logdir: 'logs'
 optimizer: 
@@ -26,5 +27,4 @@ tasks:
                       'Sambar Deer': 3, 
                       'Spotted Whistling Duck': 4, 
                       'Wild Pig': 5
-                      }
-        
+                      }      
