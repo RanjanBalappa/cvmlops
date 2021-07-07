@@ -6,18 +6,11 @@ warnings.filterwarnings('ignore')
 import yaml
 import os
 from collections import OrderedDict
-from typing import Sequence, Dict, Optional, Sequence, Any
+from typing import Sequence, Dict, Optional, Sequence, Any, Tuple
 from tqdm import tqdm
 import numpy as np
 import torch
-from torch.optim import Adam, SGD, RMSprop
-import torch.optim.lr_scheduler as lr_scheduler
-from torch.utils.data import DataLoader, SubsetRandomSampler
-from torch.utils import tensorboard
-
-from nn.classification import Classification
-from classificationdataset import ClassificationDataset
-from utils import *
+from cv.utils import *
 
 
 
@@ -32,21 +25,21 @@ class Trainer:
         config: Dict[str, Any],
         device: Optional[torch.device] = torch.device('cpu'),
         lossfn: Optional[torch.nn.Module] = None,
-        optimizer: Optional[torch.optim] = None,
+        optimizer: Optional[torch.nn.Module] = None,
         topk: Optional[Sequence] = (1, 3)
     ):
-    self.model = model
-    self.device = device
-    self.lossfn = lossfn
-    self.optimizer = optimizer
-    self.topk = topk
-    self.config = config
+        self.model = model
+        self.device = device
+        self.lossfn = lossfn
+        self.optimizer = optimizer
+        self.topk = topk
+        self.config = config
 
     def runepoch(
         self,
         dataloader: torch.utils.data.DataLoader,
         step: str
-    ) -> Dict[str, float], np.ndarray, np.ndarray:
+    ) -> Tuple[Dict[str, float], np.ndarray, np.ndarray]:
         assert 'pred' not in step
         print(f'Starting {step}')
         istrain = True if 'train' in step else False
@@ -97,8 +90,8 @@ class Trainer:
                 for k, acc in accuracy.items():
                     topkaccuracy[f'top{k}'].update(acc * 100. / batchsize, n=batchsize)
                     description.append(f'Accuracy{k}: \
-                            {topkaccuracy[f'top{k}'].val:.3f}| \
-                            ({topkaccuracy[f'top{k}'].avg:.3f})')
+                            {topkaccuracy[f"top{k}"].val:.3f}|\
+                            ({topkaccuracy[f"top{k}"].avg:.3f})')
 
                 tqdm.set_description(' '.join(description))
     
