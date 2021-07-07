@@ -13,13 +13,12 @@ import torch
 from torch.optim import Adam, SGD, RMSprop
 import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.data import DataLoader, SubsetRandomSampler
+from cv.nn.classification import Classification
+from cv.classificationdataset import ClassificationDataset
+from cv import train, utils 
 
-from nn.classification import Classification
-from classificationdataset import ClassificationDataset
-
-from cv import train
-
-
+#set manual seed for reproducibility
+utils.setseed(1234)
 
 def trainmodel(params: Namespace):
 
@@ -113,8 +112,6 @@ def trainmodel(params: Namespace):
 
         trainmetrics, _, _ = trainer.runepoch(traindataloader, step='train')
         valmetrics, targets, predictions = trainer.runepoch(valdataloader, step='val')
-        
-        
         scheduler.step()
         
         if valmetrics['top1'] > bestaccuracy:
@@ -127,3 +124,19 @@ def trainmodel(params: Namespace):
             
         if not patience:
             print(f'Model did not improve for 10 epochs so exiting!')
+
+    #Evaluate model
+    artifacts = {
+        'model': bestmodel,
+        'top1accuracy': bestaccuracy
+    }
+
+    #calculate performance metrics
+    valmetrics, targets, predictions = trainer.runepoch(valdataloader, step='val')
+    performance = utils.getperformance(targets, 
+                                        predictions, 
+                                        taskconfig['labelmapping'].keys()
+                                        )
+    artifacts['performance'] = performance
+    return artifacts
+   
