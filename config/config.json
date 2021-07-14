@@ -1,0 +1,34 @@
+{
+    "task": "classification",
+    "numepochs": 100,
+    "patience": 10,
+    "finetuneepochs": 0,
+    "optimizer": {
+        "name": "rmsprop",
+        "alpha": 0.9,
+        "initlr": 0.256,
+        "momentum": 0.9,
+        "weightdecay": 1e-5
+    },
+    "lossfn": "crossentropyloss",
+    "pretrained": "imagenet",
+    "pretrainedpath": "",
+    "batchsize": 4,
+    "imagesize": 300,
+    "tasks":{
+        "classification":{
+            "extractor": "efficientnet-b3",
+            "numclasses": 6,
+            "classweights": [],
+            "labelmapping": {
+                "Lesser Mousedeer": 0, 
+                "Long Tailed Macaque": 1, 
+                "Others": 2, 
+                "Sambar Deer": 3, 
+                "Spotted Whistling Duck": 4, 
+                "Wild Pig": 5
+            }
+        }
+    }
+
+}
