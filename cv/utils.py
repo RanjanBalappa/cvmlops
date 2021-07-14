@@ -1,11 +1,11 @@
 # cv/utils.py
 # Utils to support training
-
-import torch
+import json
 from typing import Mapping, Dict, Any, List
 import random
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support
+import torch
 
 
 class Averagemeter:
@@ -63,3 +63,28 @@ def getperformance(
         return metrics
 
 
+def save_dict(d: Dict, filepath: str, cls=None, sortkeys: bool = False) -> None:
+    """Save a dictionary to a specific location.
+    Warning:
+        This will overwrite any existing file at `filepath`.
+    Args:
+        d (Dict): dictionary to save.
+        filepath (str): location to save the dictionary to as a JSON file.
+        cls (optional): encoder to use on dict data. Defaults to None.
+        sortkeys (bool, optional): sort keys in dict alphabetically. Defaults to False.
+    """
+    with open(filepath, "w") as fp:
+        json.dump(d, indent=2, fp=fp, cls=cls, sort_keys=sortkeys)
+
+
+
+def load_dict(filepath: str) -> Dict:
+    """Load a dictionary from a JSON's filepath.
+    Args:
+        filepath (str): JSON's filepath.
+    Returns:
+        A dictionary with the data loaded.
+    """
+    with open(filepath) as fp:
+        d = json.load(fp)
+    return d
