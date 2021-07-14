@@ -5,6 +5,7 @@ import warnings
 warnings.filterwarnings('ignore')
 import yaml
 import os
+from pathlib import Path
 from argparse import Namespace
 from collections import OrderedDict
 from typing import Sequence, Dict, Optional, Sequence, Any
@@ -20,12 +21,16 @@ from cv import train, utils
 #set manual seed for reproducibility
 utils.setseed(1234)
 
+#Data dir
+BASEDIR = BASEDIR = Path(__file__).parent.parent.absolute()
+DATADIR = Path(BASEDIR, 'data')
+
 def trainmodel(params: Namespace):
 
     # ## Load Task Config
-    task = params['task']
-    taskconfig = params['tasks'][task.lower()]
-    print(f'The task defined is {task} with config {config}')
+    task = params.task
+    taskconfig = params.tasks[task.lower()]
+    print(f'The task defined is {task} with config {taskconfig}')
 
 
     # ## Load Model
@@ -34,9 +39,9 @@ def trainmodel(params: Namespace):
     }
     model = models[task]
     startepoch = -1
-    if config['pretrained']  != 'imagenet' and config['pretrainedpath'] !='':
-        print(f"Loading the checkpoint from {config['pretrainedpath']}")
-        checkpoint = torch.load(config['pretrainedpath'], map_location='cpu')
+    if params.pretrained  != 'imagenet' and params.pretrainedpath !='':
+        print(f"Loading the checkpoint from {params['pretrainedpath']}")
+        checkpoint = torch.load(params.pretrainedpath, map_location='cpu')
         model.load_state_dict(checkpoint['model'])
         startepoch = checkpoint['epoch']
 
@@ -55,41 +60,41 @@ def trainmodel(params: Namespace):
     lossfns = {
         'crossentropyloss': torch.nn.CrossEntropyLoss(reduction='none').to(device)
     }
-    lossfn = lossfns[config['lossfn']]
+    lossfn = lossfns[params.lossfn]
 
 
     # ## Define Optimizer
     optimizers = {
-        'sgd': SGD(model.parameters(), lr=float(config['optimizer']['initlr']), 
-                momentum=float(config['optimizer']['momentum']), 
-                weight_decay=float(config['optimizer']['momentum'])),
-        'rmsprop': RMSprop(model.parameters(), lr=float(config['optimizer']['initlr']), 
-                        alpha=float(config['optimizer']['alpha']),
-                        momentum=float(config['optimizer']['momentum']), 
-                        weight_decay=float(config['optimizer']['weightdecay']))
+        'sgd': SGD(model.parameters(), lr=float(params.optimizer['initlr']), 
+                momentum=float(params.optimizer['momentum']), 
+                weight_decay=float(params.optimizer['momentum'])),
+        'rmsprop': RMSprop(model.parameters(), lr=float(params.optimizer['initlr']), 
+                        alpha=float(params.optimizer['alpha']),
+                        momentum=float(params.optimizer['momentum']), 
+                        weight_decay=float(params.optimizer['weightdecay']))
     }
-    optimizer = optimizers[config['optimizer']['name']]
+    optimizer = optimizers[params.optimizer['name']]
     scheduler = lr_scheduler.StepLR(
                 optimizer=optimizer, step_size=1, gamma=0.97 ** (1 / 2.4))
 
 
     # ## Load Data
-    traindataset = ClassificationDataset(datadir=config['datadir'], fold='train', 
-                                        imagesize=config['imagesize'], 
+    traindataset = ClassificationDataset(datadir=DATADIR, fold='train', 
+                                        imagesize=params.imagesize, 
                                         labelmapping=taskconfig['labelmapping'])
     traindataloader = DataLoader(traindataset, 
                                 shuffle=True, 
                                 pin_memory=True, 
                                 num_workers=6, 
-                                batch_size=config['batchsize'])
-    valdataset = ClassificationDataset(datadir=config['datadir'], fold='valid', 
-                                    imagesize=config['imagesize'], 
+                                batch_size=params.batchsize)
+    valdataset = ClassificationDataset(datadir=DATADIR, fold='valid', 
+                                    imagesize=params.imagesize, 
                                     labelmapping=taskconfig['labelmapping'])
     valdataloader = DataLoader(valdataset, 
                                 shuffle=False, 
                                 pin_memory=True, 
                                 num_workers=6, 
-                                batch_size=config['batchsize'])
+                                batch_size=params.batchsize)
 
 
 
@@ -97,7 +102,7 @@ def trainmodel(params: Namespace):
     bestaccuracy: float = 0.0
     bestmodel: torch.nn.Module = model
     top = (1, 3)
-    patience = params['earlystopping']
+    patience = params.patience
 
     trainer = train.Trainer(
         model,
