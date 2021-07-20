@@ -20,22 +20,7 @@ import random
 MEANS = np.asarray([0.485, 0.456, 0.406])
 STDS = np.asarray([0.229, 0.224, 0.225])
 
-#define transform
-normalize = tv.transforms.Normalize(mean=MEANS, std=STDS, inplace=True)
-traintransform = tv.transforms.Compose([
-    tv.transforms.RandomRotation(degrees=(-90, 90)),
-    tv.transforms.RandomHorizontalFlip(p=0.5),
-    tv.transforms.RandomVerticalFlip(p=0.1),
-    tv.transforms.RandomGrayscale(p=0.1),
-    tv.transforms.ColorJitter(brightness=.25, contrast=.25, saturation=.25),
-    tv.transforms.ToTensor(),
-    normalize
-])
 
-valtransform = tv.transforms.Compose([
-    tv.transforms.ToTensor(),
-    normalize
-])
 
 
 class ClassificationDataset(Dataset):
@@ -51,6 +36,27 @@ class ClassificationDataset(Dataset):
         
         random.shuffle(self.imagepaths)
         self.imagesize = imagesize
+
+        #define transform
+        normalize = tv.transforms.Normalize(mean=MEANS, std=STDS, inplace=True)
+
+        if self.fold == 'train':
+            self.transform = tv.transforms.Compose([
+                tv.transforms.RandomResizedCrop(self.imagesize),
+                tv.transforms.RandomRotation(degrees=(-90, 90)),
+                tv.transforms.RandomHorizontalFlip(),
+                tv.transforms.RandomGrayscale(p=0.1),
+                tv.transforms.ColorJitter(brightness=.25, contrast=.25, saturation=.25),
+                tv.transforms.ToTensor(),
+                normalize
+            ])
+        else:
+            self.transform = tv.transforms.Compose([
+                tv.transforms.Resize(self.imagesize, interpolation=PIL.Image.BICUBIC),
+                tv.transforms.CenterCrop(self.imagesize),
+                tv.transforms.ToTensor(),
+                normalize
+            ])
         
         
     def __getitem__(self, index:int) -> Tuple[Any, ...]:
@@ -60,17 +66,7 @@ class ClassificationDataset(Dataset):
         
         #read image
         image = default_loader(imagepath)
-
-        
-        if self.fold == 'train':
-            image =  tv.transforms.RandomResizedCrop(self.imagesize).forward(image)
-            image = traintransform(image)
-            
-        else:
-            # resizes smaller edge to img_size
-            image = tv.transforms.Resize(self.imagesize, interpolation=PIL.Image.BICUBIC).forward(image)
-            image = tv.transforms.CenterCrop(self.imagesize).forward(image)
-            image = valtransform(image)
+        image = self.transform(image)
             
         #TODO - weights to labels            
         return image, imagelabel, imagepath

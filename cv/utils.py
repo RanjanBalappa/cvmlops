@@ -47,17 +47,17 @@ def getperformance(
         metrics['overall']['precision'] = overallmetrics[0]
         metrics['overall']['recall'] = overallmetrics[1]
         metrics['overall']['f1score'] = overallmetrics[2]
-        metrics['overall']['numsamples'] = np.float32(targets.shape(0))
+        metrics['overall']['numsamples'] = np.float64(targets.shape[0])
 
         #classwise performance metrics
         classmetrics = precision_recall_fscore_support(targets,
                             predictions, average=None)
         for cid in range(len(classes)):
-            metrics['class'][classes[i]] = {
-                'precision': classmetrics[0][i],
-                'recall': classmetrics[11][i],
-                'f1score': classmetrics[2][i],
-                'numsamples': np.float32(classmetrics[3][i])
+            metrics['class'][classes[cid]] = {
+                'precision': classmetrics[0][cid],
+                'recall': classmetrics[1][cid],
+                'f1score': classmetrics[2][cid],
+                'numsamples': np.float64(classmetrics[3][cid])
             }
 
         return metrics
